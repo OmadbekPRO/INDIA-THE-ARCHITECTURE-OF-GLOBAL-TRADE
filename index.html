@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>INDIA — The Architecture of Global Trade</title>
+<style>
+/* ========================================================================
+   DESIGN SYSTEM — CSS Custom Properties
+   ======================================================================== */
+:root {
+  /* Backgrounds */
+  --bg-deep: #080c22;
+  --bg-primary: #0a0e27;
+  --bg-secondary: #111633;
+  --bg-elevated: #1a1f3a;
+  --bg-card: #161b38;
+  
+  /* Accents */
+  --saffron: #e8732a;
+  --saffron-warm: #f59e3f;
+  --saffron-glow: rgba(232, 115, 42, 0.35);
+  --gold: #c9a84c;
+  --gold-metallic: #d4a853;
+  --gold-glow: rgba(201, 168, 76, 0.3);
+  --emerald: #2d8a6e;
+  --emerald-deep: #1b6b52;
+  --negative: #c44b3f;
+  --blue-cool: #4a7fb5;
+  
+  /* Text */
+  --text-primary: #f0ece4;
+  --text-secondary: #d4cfc5;
+  --text-muted: #8a8d9c;
+  --text-dim: #5c6080;
+  
+  /* Borders & Lines */
+  --border: #2a2f4a;
+  --border-subtle: rgba(255,255,255,0.06);
+  --grid-line: rgba(255,255,255,0.04);
+  
+  /* Typography */
+  --font-display: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+  
+  /* Animation */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-subtle: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-dramatic: cubic-bezier(0.22, 1, 0.36, 1);
+  
+  /* Layout */
+  --slide-w: 1920;
+  --slide-h: 1080;
+}
+
+/* ========================================================================
+   RESET & BASE
+   ======================================================================== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  cursor: none;
+}
+
+::selection {
+  background: var(--saffron);
+  color: var(--bg-deep);
+}
+
+/* ========================================================================
+   CUSTOM CURSOR
+   ======================================================================== */
+#cursor {
+  position: fixed;
+  width: 20px; height: 20px;
+  border: 1.5px solid var(--saffron);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10000;
+  transition: transform 0.15s var(--ease-subtle), opacity 0.3s;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  mix-blend-mode: difference;
+}
+#cursor.visible { opacity: 1; }
+#cursor.hovering { transform: translate(-50%, -50%) scale(1.8); border-color: var(--gold); }
+
+/* ========================================================================
+   PRESENTATION CONTAINER
+   ======================================================================== */
+#presentation {
+  position: relative;
+  width: 100vw; height: 100vh;
+  overflow: hidden;
+  background: var(--bg-deep);
+}
+
+/* ========================================================================
+   SLIDE BASE
+   ======================================================================== */
+.slide {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.98);
+  transition: opacity 0.7s var(--ease-out-expo), 
+              transform 0.7s var(--ease-out-expo),
+              visibility 0s 0.7s;
+  padding: 60px 80px;
+  background: var(--bg-primary);
+  z-index: 1;
+}
+
+.slide.active {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+  transition: opacity 0.7s var(--ease-out-expo), 
+              transform 0.7s var(--ease-out-expo),
+              visibility 0s 0s;
+  z-index: 2;
+}
+
+.slide.exiting {
+  opacity: 0;
+  transform: scale(0.96);
+  z-index: 1;
+}
+
+/* ========================================================================
+   NAVIGATION UI
+   ======================================================================== */
+#nav-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 4px;
+  background: rgba(255,255,255,0.03);
+  z-index: 100;
+}
+
+#progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--saffron), var(--gold));
+  width: 0%;
+  transition: width 0.5s var(--ease-out-expo);
+}
+
+#slide-counter {
+  position: fixed;
+  bottom: 20px; right: 40px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  z-index: 100;
+  font-variant-numeric: tabular-nums;
+  transition: opacity 0.4s;
+}
+
+#slide-counter .current { color: var(--text-muted); }
+
+#nav-hint {
+  position: fixed;
+  bottom: 20px; left: 40px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  z-index: 100;
+  opacity: 0.5;
+  transition: opacity 0.4s;
+}
+
+/* Chapter indicator */
+#chapter-indicator {
+  position: fixed;
+  top: 28px; left: 40px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--saffron);
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.5s var(--ease-subtle);
+}
+#chapter-indicator.visible { opacity: 0.7; }
+
+/* Fullscreen button */
+#fs-btn {
+  position: fixed;
+  top: 24px; right: 40px;
+  width: 36px; height: 36px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.3s, color 0.3s;
+  font-size: 14px;
+}
+#fs-btn:hover { border-color: var(--saffron); color: var(--saffron); }
+
+/* ========================================================================
+   OPENING SLIDE (SLIDE 1) — CINEMATIC
+   ======================================================================== */
+.slide-opening {
+  padding: 0;
+  background: var(--bg-deep);
+  overflow: hidden;
+}
+
+#opening-canvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 1;
+}
+
+#india-map-container {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -52%);
+  width: 40%;
+  max-width: 580px;
+  z-index: 2;
+  opacity: 0;
+}
+
+#india-map-container.reveal { opacity: 1; transition: opacity 1.5s var(--ease-subtle); }
+
+#india-map {
+  width: 100%;
+  height: auto;
+}
+
+#india-map .outline {
+  fill: none;
+  stroke: var(--saffron);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 2000;
+  stroke-dashoffset: 2000;
+  filter: drop-shadow(0 0 12px var(--saffron-glow));
+}
+
+#india-map .outline.animate {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 3.5s var(--ease-dramatic);
+}
+
+#india-map .fill-glow {
+  fill: url(#mapGradient);
+  opacity: 0;
+  transition: opacity 2s var(--ease-subtle) 1.5s;
+}
+
+#india-map .fill-glow.reveal { opacity: 0.15; }
+
+.trade-route {
+  fill: none;
+  stroke-width: 1;
+  stroke-linecap: round;
+  stroke-dasharray: 8 6;
+  stroke-dashoffset: 200;
+  opacity: 0;
+}
+
+.trade-route.animate {
+  stroke-dashoffset: 0;
+  opacity: 1;
+  transition: stroke-dashoffset 2s var(--ease-subtle), opacity 0.8s;
+}
+
+.port-dot {
+  r: 3;
+  fill: var(--saffron);
+  opacity: 0;
+  filter: drop-shadow(0 0 6px var(--saffron-glow));
+}
+
+.port-dot.animate {
+  opacity: 1;
+  transition: opacity 0.6s;
+}
+
+.partner-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  fill: var(--text-muted);
+  opacity: 0;
+  transition: opacity 0.8s;
+}
+
+.partner-label.animate { opacity: 0.7; }
+
+/* Title sequence */
+.title-container {
+  position: absolute;
+  bottom: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  z-index: 5;
+  width: 80%;
+}
+
+.title-main {
+  font-size: clamp(48px, 7vw, 96px);
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  color: var(--text-primary);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1.2s var(--ease-out-expo), transform 1.2s var(--ease-out-expo);
+  text-shadow: 0 0 60px var(--saffron-glow);
+}
+
+.title-main.reveal {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.title-sub {
+  font-size: clamp(14px, 2vw, 22px);
+  font-weight: 400;
+  letter-spacing: 0.25em;
+  color: var(--gold);
+  margin-top: 12px;
+  opacity: 0;
+  transform: translateY(15px);
+  transition: opacity 1s var(--ease-out-expo) 0.4s, transform 1s var(--ease-out-expo) 0.4s;
+}
+
+.title-sub.reveal {
+  opacity: 0.9;
+  transform: translateY(0);
+}
+
+.title-uzbek {
+  font-size: clamp(11px, 1.2vw, 15px);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-top: 20px;
+  opacity: 0;
+  transition: opacity 1s var(--ease-subtle) 1s;
+  line-height: 1.6;
+}
+
+.title-uzbek.reveal { opacity: 0.6; }
+
+/* Decorative line */
+.title-line {
+  width: 60px;
+  height: 1px;
+  background: var(--gold);
+  margin: 24px auto 0;
+  opacity: 0;
+  transform: scaleX(0);
+  transition: opacity 0.8s 1.2s, transform 0.8s var(--ease-out-expo) 1.2s;
+}
+
+.title-line.reveal { opacity: 0.5; transform: scaleX(1); }
+
+/* ========================================================================
+   CONTENT SLIDE STYLES
+   ======================================================================== */
+.slide-content {
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 80px 100px;
+}
+
+.chapter-tag {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--saffron);
+  opacity: 0;
+  transform: translateY(10px);
+  margin-bottom: 16px;
+}
+
+.chapter-tag.reveal {
+  opacity: 0.8;
+  transform: translateY(0);
+  transition: all 0.6s var(--ease-out-expo);
+}
+
+.slide-title {
+  font-size: clamp(28px, 3.5vw, 48px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--text-primary);
+  max-width: 900px;
+  opacity: 0;
+  transform: translateY(15px);
+}
+
+.slide-title.reveal {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.7s var(--ease-out-expo) 0.15s;
+}
+
+.slide-divider {
+  width: 48px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--saffron), transparent);
+  margin: 28px 0;
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.slide-divider.reveal {
+  opacity: 1;
+  transform: scaleX(1);
+  transition: all 0.6s var(--ease-out-expo) 0.3s;
+}
+
+/* Content cards */
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  width: 100%;
+  max-width: 1600px;
+  margin-top: 8px;
+}
+
+.content-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 32px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s var(--ease-out-expo), transform 0.6s var(--ease-out-expo);
+}
+
+.content-card.reveal {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.content-card:nth-child(1) { transition-delay: 0.35s; }
+.content-card:nth-child(2) { transition-delay: 0.45s; }
+.content-card:nth-child(3) { transition-delay: 0.55s; }
+
+.card-icon {
+  font-size: 28px;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.card-number {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--saffron);
+  margin-bottom: 12px;
+}
+
+.card-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+  line-height: 1.35;
+}
+
+.card-text {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--text-secondary);
+}
+
+/* Source citation */
+.source-citation {
+  position: absolute;
+  bottom: 28px;
+  right: 40px;
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+  opacity: 0;
+}
+.source-citation.reveal { opacity: 0.5; transition: opacity 0.6s 0.8s; }
+
+/* ========================================================================
+   DATA HERO SLIDE
+   ======================================================================== */
+.slide-data-hero {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.hero-stat-container {
+  margin-bottom: 48px;
+}
+
+.hero-stat-value {
+  font-size: clamp(56px, 8vw, 110px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  line-height: 1;
+  opacity: 0;
+  transform: translateY(25px);
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-stat-value.reveal {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.8s var(--ease-out-expo) 0.2s;
+}
+
+.hero-stat-value .dollar {
+  color: var(--saffron);
+  font-weight: 600;
+}
+
+.hero-stat-value .unit {
+  font-size: 0.35em;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  vertical-align: baseline;
+  margin-left: 8px;
+}
+
+.hero-stat-label {
+  font-size: clamp(14px, 1.5vw, 20px);
+  font-weight: 400;
+  color: var(--text-secondary);
+  margin-top: 8px;
+  letter-spacing: 0.03em;
+  opacity: 0;
+}
+
+.hero-stat-label.reveal {
+  opacity: 0.8;
+  transition: opacity 0.7s 0.5s;
+}
+
+/* Supporting stats row */
+.stats-row {
+  display: flex;
+  gap: 56px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  text-align: center;
+  opacity: 0;
+  transform: translateY(15px);
+  transition: all 0.6s var(--ease-out-expo);
+}
+
+.stat-item.reveal {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.stat-item:nth-child(1) { transition-delay: 0.6s; }
+.stat-item:nth-child(2) { transition-delay: 0.7s; }
+.stat-item:nth-child(3) { transition-delay: 0.8s; }
+.stat-item:nth-child(4) { transition-delay: 0.9s; }
+
+.stat-number {
+  font-size: clamp(28px, 3vw, 42px);
+  font-weight: 700;
+  color: var(--gold);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-top: 8px;
+  max-width: 140px;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 60px;
+  background: var(--border);
+  align-self: center;
+}
+
+/* Badge */
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(232, 115, 42, 0.1);
+  border: 1px solid rgba(232, 115, 42, 0.2);
+  border-radius: 40px;
+  padding: 10px 24px;
+  margin-bottom: 36px;
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.rank-badge.reveal {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.6s var(--ease-out-expo) 0.1s;
+}
+
+.rank-badge-text {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--saffron);
+}
+
+/* ========================================================================
+   CHART SLIDE
+   ======================================================================== */
+.slide-chart {
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 70px 100px 80px;
+}
+
+.chart-container {
+  width: 100%;
+  max-width: 1400px;
+  margin-top: 20px;
+  display: flex;
+  gap: 48px;
+}
+
+.chart-area {
+  flex: 1;
+  min-width: 0;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 14px;
+  opacity: 0;
+  transform: translateX(-15px);
+  transition: all 0.5s var(--ease-out-expo);
+}
+
+.bar-row.reveal {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.bar-label {
+  width: 200px;
+  min-width: 200px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  text-align: right;
+  padding-right: 20px;
+  line-height: 1.3;
+}
+
+.bar-track {
+  flex: 1;
+  height: 32px;
+  background: var(--bg-card);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  width: 0;
+  transition: width 1.2s var(--ease-out-expo);
+  display: flex;
+  align-items: center;
+  padding-left: 12px;
+  min-width: 0;
+  position: relative;
+}
+
+.bar-fill.animate { /* width set by JS */ }
+
+.bar-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  position: absolute;
+  right: -70px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-legend {
+  width: 280px;
+  padding-top: 8px;
+}
+
+.chart-note {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* Donut chart */
+.donut-container {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  margin-top: 16px;
+}
+
+.donut-svg {
+  width: 200px;
+  height: 200px;
+  transform: rotate(-90deg);
+}
+
+.donut-segment {
+  fill: none;
+  stroke-width: 28;
+  stroke-dasharray: 0 1000;
+  transition: stroke-dasharray 1.2s var(--ease-out-expo);
+}
+
+.donut-center-text {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* ========================================================================
+   PRESENTER NOTES PANEL (hidden by default)
+   ======================================================================== */
+#notes-panel {
+  position: fixed;
+  top: 0; right: 0;
+  width: 400px;
+  height: 100vh;
+  background: #0d1128;
+  border-left: 1px solid var(--border);
+  padding: 32px;
+  z-index: 200;
+  transform: translateX(100%);
+  transition: transform 0.4s var(--ease-out-expo);
+  overflow-y: auto;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+#notes-panel.open { transform: translateX(0); }
+
+#notes-panel h3 {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--saffron);
+  margin-bottom: 16px;
+}
+
+.notes-content p {
+  margin-bottom: 12px;
+}
+
+/* ========================================================================
+   KEYFRAMES
+   ======================================================================== */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { filter: drop-shadow(0 0 8px var(--saffron-glow)); }
+  50% { filter: drop-shadow(0 0 20px var(--saffron-glow)); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ========================================================================
+   RESPONSIVE (presentation scale)
+   ======================================================================== */
+@media (max-width: 1200px) {
+  .slide-content { padding: 60px 60px; }
+  .slide-chart { padding: 60px 60px 70px; }
+  .content-grid { grid-template-columns: 1fr 1fr; }
+  .bar-label { width: 160px; min-width: 160px; font-size: 13px; }
+  .stats-row { gap: 32px; }
+}
+
+@media (max-width: 800px) {
+  .content-grid { grid-template-columns: 1fr; }
+  .stats-row { flex-direction: column; gap: 24px; }
+  .stat-divider { display: none; }
+  .chart-container { flex-direction: column; }
+  .chart-legend { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div id="cursor"></div>
+
+<!-- Presentation -->
+<div id="presentation">
+
+  <!-- ================================================================
+       SLIDE 1 — CINEMATIC OPENING
+       ================================================================ -->
+  <section class="slide slide-opening active" data-slide="1" data-chapter="">
+    <canvas id="opening-canvas"></canvas>
+    
+    <div id="india-map-container">
+      <svg id="india-map" viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="mapGradient" cx="50%" cy="45%" r="50%">
+            <stop offset="0%" stop-color="var(--saffron)" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="var(--saffron)" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="portGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="var(--saffron)" stop-opacity="0.9"/>
+            <stop offset="100%" stop-color="var(--saffron)" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        
+        <!-- India outline -->
+        <path class="fill-glow" d="M 185 18 C 175 15, 160 20, 148 35 C 136 52, 126 72, 118 92 C 110 112, 103 132, 98 150 C 90 155, 76 148, 63 138 C 52 130, 44 120, 42 112 C 40 104, 44 98, 52 96 C 60 94, 68 100, 75 112 C 78 118, 72 128, 64 135 C 56 142, 48 152, 42 162 C 35 175, 33 188, 40 200 C 48 210, 62 208, 78 200 C 92 210, 100 228, 108 250 C 116 272, 122 295, 130 318 C 138 340, 145 360, 155 380 C 162 395, 170 410, 178 425 C 185 438, 192 448, 200 455 C 206 460, 212 458, 218 450 C 228 435, 238 415, 248 392 C 258 368, 268 342, 276 315 C 284 288, 290 260, 296 235 C 302 210, 306 188, 310 168 C 314 148, 318 130, 324 115 C 328 104, 334 95, 342 88 C 350 80, 358 72, 365 62 C 372 52, 375 42, 370 36 C 365 30, 358 32, 348 40 C 340 48, 332 56, 325 64 C 318 72, 312 76, 305 78 C 298 74, 290 66, 278 55 C 265 42, 250 30, 235 22 C 220 14, 200 12, 185 18 Z"/>
+
+        <path class="outline" d="M 185 18 C 175 15, 160 20, 148 35 C 136 52, 126 72, 118 92 C 110 112, 103 132, 98 150 C 90 155, 76 148, 63 138 C 52 130, 44 120, 42 112 C 40 104, 44 98, 52 96 C 60 94, 68 100, 75 112 C 78 118, 72 128, 64 135 C 56 142, 48 152, 42 162 C 35 175, 33 188, 40 200 C 48 210, 62 208, 78 200 C 92 210, 100 228, 108 250 C 116 272, 122 295, 130 318 C 138 340, 145 360, 155 380 C 162 395, 170 410, 178 425 C 185 438, 192 448, 200 455 C 206 460, 212 458, 218 450 C 228 435, 238 415, 248 392 C 258 368, 268 342, 276 315 C 284 288, 290 260, 296 235 C 302 210, 306 188, 310 168 C 314 148, 318 130, 324 115 C 328 104, 334 95, 342 88 C 350 80, 358 72, 365 62 C 372 52, 375 42, 370 36 C 365 30, 358 32, 348 40 C 340 48, 332 56, 325 64 C 318 72, 312 76, 305 78 C 298 74, 290 66, 278 55 C 265 42, 250 30, 235 22 C 220 14, 200 12, 185 18 Z"/>
+        
+        <!-- Major ports -->
+        <circle class="port-dot" cx="82" cy="198" data-port="Mumbai"/>
+        <circle class="port-dot" cx="55" cy="155" data-port="Kandla"/>
+        <circle class="port-dot" cx="165" cy="420" data-port="Kochi"/>
+        <circle class="port-dot" cx="235" cy="400" data-port="Chennai"/>
+        <circle class="port-dot" cx="310" cy="155" data-port="Kolkata"/>
+        <circle class="port-dot" cx="120" cy="290" data-port="Goa"/>
+        <circle class="port-dot" cx="290" cy="265" data-port="Visakhapatnam"/>
+      </svg>
+    </div>
+    
+    <!-- Trade routes (full viewport SVG overlay) -->
+    <svg id="trade-routes" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid meet" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:3;pointer-events:none;">
+      <!-- Route: India → USA (west) -->
+      <path class="trade-route" d="M 780 480 C 600 380, 350 320, 150 350" stroke="var(--saffron)" data-partner="AQSh"/>
+      <text class="partner-label" x="130" y="342" text-anchor="end">AQSh</text>
+      
+      <!-- Route: India → UAE (southwest) -->
+      <path class="trade-route" d="M 820 520 C 720 560, 620 580, 540 560" stroke="var(--gold)" data-partner="BAA"/>
+      <text class="partner-label" x="520" y="555" text-anchor="end">BAA</text>
+      
+      <!-- Route: India → China (northeast) -->
+      <path class="trade-route" d="M 1000 420 C 1100 350, 1250 280, 1380 260" stroke="#c44b3f" data-partner="Xitoy"/>
+      <text class="partner-label" x="1400" y="255">XITOY</text>
+      
+      <!-- Route: India → Russia (north) -->
+      <path class="trade-route" d="M 920 380 C 920 280, 1000 180, 1150 120" stroke="var(--emerald)" data-partner="Rossiya"/>
+      <text class="partner-label" x="1170" y="115">ROSSIYA</text>
+      
+      <!-- Route: India → Singapore (southeast) -->
+      <path class="trade-route" d="M 980 560 C 1080 620, 1200 680, 1320 720" stroke="var(--blue-cool)" data-partner="Singapur"/>
+      <text class="partner-label" x="1340" y="725">SINGAPUR</text>
+      
+      <!-- Route: India → Germany/EU (northwest) -->
+      <path class="trade-route" d="M 850 400 C 750 300, 600 200, 420 140" stroke="#7c6fa0" data-partner="Germaniya"/>
+      <text class="partner-label" x="400" y="132" text-anchor="end">YEVROPA</text>
+    </svg>
+    
+    <!-- Title sequence -->
+    <div class="title-container">
+      <div class="title-main">INDIA</div>
+      <div class="title-sub">THE ARCHITECTURE OF GLOBAL TRADE</div>
+      <div class="title-line"></div>
+      <div class="title-uzbek">Xalqaro iqtisodiy aloqalarni tartibga solishning<br>institutsional va amaliy tahlili</div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       SLIDE 2 — WHY REGULATE INTERNATIONAL TRADE?
+       ================================================================ -->
+  <section class="slide slide-content" data-slide="2" data-chapter="I — GLOBAL SAVDO SAHNASI">
+    <div class="chapter-tag">I — Global savdo sahnasi</div>
+    <h2 class="slide-title">Nima uchun xalqaro savdo<br>tartibga solinadi?</h2>
+    <div class="slide-divider"></div>
+    
+    <div class="content-grid">
+      <div class="content-card">
+        <span class="card-number">01</span>
+        <h3 class="card-title">Adolatli raqobat muhitini yaratish</h3>
+        <p class="card-text">Xalqaro savdo qoidalari barcha mamlakatlar uchun teng sharoitlar yaratadi. Tartibga solishsiz kuchli mamlakatlar kuchsizlarni bozordan siqib chiqarishi mumkin. JSSh (WTO) qoidalari kamsitmaslik tamoyilini (MFN) joriy etadi.</p>
+      </div>
+      
+      <div class="content-card">
+        <span class="card-number">02</span>
+        <h3 class="card-title">Savdo to'siqlarini kamaytirish</h3>
+        <p class="card-text">Tariflar, kvotalar va notatarif to'siqlar erkin savdoga halaqit beradi. Xalqaro bitimlar orqali mamlakatlar o'zaro savdo xarajatlarini kamaytirib, iste'molchilar va ishlab chiqaruvchilarga foyda keltiradi.</p>
+      </div>
+      
+      <div class="content-card">
+        <span class="card-number">03</span>
+        <h3 class="card-title">Nizolarni hal qilish tizimi</h3>
+        <p class="card-text">Savdo kelishmovchiliklari urush yoki iqtisodiy qasos o'rniga, xalqaro huquq normalariga asosan hal qilinadi. JSSh ning Nizolarni Hal Qilish Organi (DSB) — markaziy mexanizm sifatida ishlaydi.</p>
+      </div>
+    </div>
+    
+    <div class="source-citation">Manba: WTO, "Understanding the WTO", 2024</div>
+  </section>
+
+  <!-- ================================================================
+       SLIDE 3 — INDIA'S GLOBAL ECONOMIC POSITION
+       ================================================================ -->
+  <section class="slide slide-data-hero" data-slide="3" data-chapter="II — HINDISTON JAHON IQTISODIYOTIDA">
+    <div class="chapter-tag" style="position:absolute;top:80px;left:100px;">II — Hindiston jahon iqtisodiyotida</div>
+    
+    <div class="rank-badge">
+      <span class="rank-badge-text">JAHONNING 5-IQTISODIYOTI</span>
+    </div>
+    
+    <div class="hero-stat-container">
+      <div class="hero-stat-value">
+        <span class="dollar">$</span><span data-count-to="3.9" data-decimals="1">0.0</span><span class="unit">TRILLION GDP</span>
+      </div>
+      <div class="hero-stat-label">Hindistonning yalpi ichki mahsuloti (2024–25)</div>
+    </div>
+    
+    <div class="stats-row">
+      <div class="stat-item">
+        <div class="stat-number"><span data-count-to="6.5" data-decimals="1">0.0</span>%</div>
+        <div class="stat-label">YaIM o'sish sur'ati</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-number">#<span data-count-to="18" data-decimals="0">0</span></div>
+        <div class="stat-label">Jahon tovar eksporti</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-number">#<span data-count-to="8" data-decimals="0">0</span></div>
+        <div class="stat-label">Tijorat xizmatlari eksporti</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-number"><span class="dollar">$</span><span data-count-to="81" data-decimals="0">0</span><span class="unit" style="font-size:14px;margin-left:3px;">mlrd</span></div>
+        <div class="stat-label">To'g'ridan-to'g'ri xorijiy investitsiyalar</div>
+      </div>
+    </div>
+    
+    <div class="source-citation">Manba: IMF, World Bank, WTO, RBI — 2024-25 ma'lumotlari</div>
+  </section>
+
+  <!-- ================================================================
+       SLIDE 4 — EXPORT STRUCTURE (BAR CHART)
+       ================================================================ -->
+  <section class="slide slide-chart" data-slide="4" data-chapter="II — HINDISTON JAHON IQTISODIYOTIDA">
+    <div class="chapter-tag">II — Hindiston jahon iqtisodiyotida</div>
+    <h2 class="slide-title">Tovar eksporti tarkibi</h2>
+    <div class="slide-divider"></div>
+    
+    <div class="chart-container">
+      <div class="chart-area">
+        <div class="bar-row" style="transition-delay:0.4s">
+          <div class="bar-label">Muhandislik mahsulotlari</div>
+          <div class="bar-track"><div class="bar-fill" data-width="100" style="background:linear-gradient(90deg, var(--saffron), #f0943e);"><span class="bar-value">$116.7 mlrd</span></div></div>
+        </div>
+        <div class="bar-row" style="transition-delay:0.5s">
+          <div class="bar-label">Neft mahsulotlari</div>
+          <div class="bar-track"><div class="bar-fill" data-width="54" style="background:linear-gradient(90deg, var(--gold-metallic), #e0bc5f);"><span class="bar-value">$63.3 mlrd</span></div></div>
+        </div>
+        <div class="bar-row" style="transition-delay:0.6s">
+          <div class="bar-label">Elektron tovarlar</div>
+          <div class="bar-track"><div class="bar-fill" data-width="30" style="background:linear-gradient(90deg, var(--emerald), #3da882);"><span class="bar-value">$38.6 mlrd</span></div></div>
+        </div>
+        <div class="bar-row" style="transition-delay:0.65s">
+          <div class="bar-label">Dori-darmonlar</div>
+          <div class="bar-track"><div class="bar-fill" data-width="26" style="background:linear-gradient(90deg, var(--blue-cool), #5e94ca);"><span class="bar-value">$30.5 mlrd</span></div></div>
+        </div>
+        <div class="bar-row" style="transition-delay:0.7s">
+          <div class="bar-label">Qimmatbaho toshlar</div>
+          <div class="bar-track"><div class="bar-fill" data-width="24" style="background:linear-gradient(90deg, #7c6fa0, #9585b8);"><span class="bar-value">$29.8 mlrd</span></div></div>
+        </div>
+        <div class="bar-row" style="transition-delay:0.75s">
+          <div class="bar-label">Transport vositalari</div>
+          <div class="bar-track"><div class="bar-fill" data-width="21" style="background:linear-gradient(90deg, #3a9e8f, #4eb8a8);"><span class="bar-value">$25.0 mlrd</span></div></div>
+        </div>
+        <div class="bar-row" style="transition-delay:0.8s">
+          <div class="bar-label">Kimyoviy moddalar</div>
+          <div class="bar-track"><div class="bar-fill" data-width="18" style="background:linear-gradient(90deg, #d4963a, #e0aa52);"><span class="bar-value">$22.0 mlrd</span></div></div>
+        </div>
+        <div class="bar-row" style="transition-delay:0.85s">
+          <div class="bar-label">To'qimachilik</div>
+          <div class="bar-track"><div class="bar-fill" data-width="13" style="background:linear-gradient(90deg, var(--negative), #d46258);"><span class="bar-value">$16.0 mlrd</span></div></div>
+        </div>
+      </div>
+      
+      <div class="chart-legend">
+        <div class="chart-note" style="border-top:none;padding-top:0;">
+          <strong style="color:var(--text-primary);display:block;margin-bottom:8px;">Jami tovar eksporti</strong>
+          <span style="font-size:28px;font-weight:700;color:var(--gold);display:block;margin-bottom:12px;">$437.4 mlrd</span>
+          <span style="color:var(--emerald);font-weight:600;">▲ Elektron tovarlar</span> — eng tez o'sayotgan toifa (30%+ yillik o'sish), smartfon ishlab chiqarish bilan bog'liq.
+        </div>
+        <div class="chart-note">
+          <strong style="color:var(--text-primary);">Moliyaviy yil:</strong> 2024-25<br>
+          <strong style="color:var(--text-primary);">Davr:</strong> Aprel 2024 – Mart 2025<br>
+          <strong style="color:var(--text-primary);">Valyuta:</strong> AQSh dollari
+        </div>
+      </div>
+    </div>
+    
+    <div class="source-citation">Manba: Ministry of Commerce and Industry, DGFT — FY 2024-25</div>
+  </section>
+
+</div>
+
+<!-- Navigation -->
+<div id="nav-bar"><div id="progress-bar"></div></div>
+<div id="slide-counter"><span class="current">01</span> / <span class="total">04</span></div>
+<div id="nav-hint">← → yoki SPACE</div>
+<div id="chapter-indicator"></div>
+<button id="fs-btn" title="Fullscreen (F)">⛶</button>
+
+<!-- Presenter Notes Panel -->
+<div id="notes-panel">
+  <h3>Spikerlik yozuvlari</h3>
+  <div class="notes-content" id="notes-content"></div>
+</div>
+
+<!-- ====================================================================
+     JAVASCRIPT — PRESENTATION ENGINE
+     ==================================================================== -->
+<script>
+(function() {
+  'use strict';
+
+  // =======================================================================
+  // PRESENTER NOTES (Uzbek)
+  // =======================================================================
+  const NOTES = {
+    1: `<p><strong>Ochilish sahnasi (45 soniya)</strong></p>
+        <p>Xurmatli professor va hurmatli talaba do'stlar! Bugun sizlarga Hindistonning jahon savdosidagi o'rni va xalqaro iqtisodiy aloqalarni tartibga solish haqida taqdimot tayyorladik.</p>
+        <p>Hindiston — dunyodagi eng qadimiy savdo markazlaridan biri. Ming yillar davomida bu mamlakat Ipak yo'li orqali G'arb va Sharqni bog'lab kelgan. Bugungi kunda esa Hindiston jahonning 5-yirik iqtisodiyoti sifatida xalqaro savdoda muhim o'rin tutadi.</p>
+        <p>Keling, bu savdo arxitekturasini birga o'rganamiz.</p>`,
+    
+    2: `<p><strong>Xalqaro savdoni tartibga solish zarurati (1:30)</strong></p>
+        <p>Xalqaro savdo nima uchun tartibga solinishi kerak? Uchta asosiy sabab bor:</p>
+        <p>Birinchidan, <strong>adolatli raqobat</strong>. Tartibsiz savdoda kuchli davlatlar kuchsizlarni bozordan siqib chiqaradi. WTO ning eng muhim tamoyili — Eng Ko'p Qulay Muomala (MFN) — barcha a'zolarga teng sharoitlar yaratadi.</p>
+        <p>Ikkinchidan, <strong>savdo to'siqlarini kamaytirish</strong>. Tariflar va notatarif to'siqlar savdo xarajatlarini oshiradi. Xalqaro bitimlar orqali bu xarajatlar kamaytiriladi.</p>
+        <p>Uchinchidan, <strong>nizolarni hal qilish</strong>. Savdo kelishmovchiliklari urush emas, xalqaro huquq normalariga asosan hal qilinadi. WTO ning Nizolarni Hal Qilish Organi (DSB) bu tizimning markazi hisoblanadi.</p>`,
+    
+    3: `<p><strong>Hindistonning jahon iqtisodiyotidagi o'rni (1:30)</strong></p>
+        <p>Raqamlar bilan gaplashaylik. Hindistonning YaIM — taxminan 3.9 trillion dollar. Bu jahondagi 5-o'rin. Xarid qobiliyati paritetida esa — 19.1 trillion dollar bilan 3-o'rinda, AQSh va Xitoydan keyin.</p>
+        <p>Iqtisodiy o'sish sur'ati — 6.5-7% — jahondagi eng yuqori ko'rsatkichlardan biri.</p>
+        <p>Tovar eksportida Hindiston 18-o'rinda, tovar importida esa 9-o'rinda turadi. Tijorat xizmatlari eksportida esa 8-o'rinda — bu ayniqsa AT va BPO sektori bilan bog'liq.</p>
+        <p>To'g'ridan-to'g'ri xorijiy investitsiyalar — 81 milliard dollar. Eng katta investorlar: Singapur, Mauritius va AQSh.</p>`,
+    
+    4: `<p><strong>Tovar eksporti tarkibi (1:30)</strong></p>
+        <p>Hindistonning jami tovar eksporti — 437 milliard dollar. Keling, tarkibini ko'rib chiqamiz.</p>
+        <p>Eng katta toifa — <strong>muhandislik mahsulotlari</strong>: mashinalar, po'lat, avtomobil ehtiyot qismlari — 117 milliard dollar, ya'ni jami eksportning 27 foizi.</p>
+        <p><strong>Neft mahsulotlari</strong> — ikkinchi o'rinda, 63 milliard dollar. Hindiston xom neftni import qilib, qayta ishlangan mahsulotlarni eksport qiladi.</p>
+        <p>Diqqatga sazovor — <strong>elektron tovarlar</strong>: 39 milliard dollar, yillik 30 foizdan ko'proq o'sish bilan. Bu "Make in India" siyosati va smartfon ishlab chiqarish rivoji bilan bog'liq.</p>
+        <p><strong>Dori-darmonlar</strong> — 30 milliard dollar. Hindiston "dunyoning dorixonasi" deb ataladi.</p>`
+  };
+
+  // =======================================================================
+  // STATE
+  // =======================================================================
+  const state = {
+    currentSlide: 1,
+    totalSlides: 0,
+    isAnimating: false,
+    notesOpen: false,
+    openingPlayed: false
+  };
+
+  // =======================================================================
+  // DOM REFERENCES
+  // =======================================================================
+  const slides = document.querySelectorAll('.slide');
+  const progressBar = document.getElementById('progress-bar');
+  const counterCurrent = document.querySelector('#slide-counter .current');
+  const counterTotal = document.querySelector('#slide-counter .total');
+  const chapterIndicator = document.getElementById('chapter-indicator');
+  const notesPanel = document.getElementById('notes-panel');
+  const notesContent = document.getElementById('notes-content');
+  const cursor = document.getElementById('cursor');
+
+  state.totalSlides = slides.length;
+  counterTotal.textContent = String(state.totalSlides).padStart(2, '0');
+
+  // =======================================================================
+  // NAVIGATION
+  // =======================================================================
+  function goToSlide(n) {
+    if (state.isAnimating || n < 1 || n > state.totalSlides || n === state.currentSlide) return;
+    state.isAnimating = true;
+
+    const oldSlide = document.querySelector('.slide.active');
+    const newSlide = slides[n - 1];
+
+    // Remove active, add exiting
+    if (oldSlide) {
+      oldSlide.classList.remove('active');
+      oldSlide.classList.add('exiting');
+      setTimeout(() => oldSlide.classList.remove('exiting'), 800);
+    }
+
+    // Activate new slide
+    newSlide.classList.add('active');
+    state.currentSlide = n;
+
+    // Update UI
+    updateNavUI();
+    
+    // Trigger slide animations
+    setTimeout(() => triggerSlideAnimations(newSlide), 100);
+
+    setTimeout(() => { state.isAnimating = false; }, 750);
+  }
+
+  function nextSlide() { goToSlide(state.currentSlide + 1); }
+  function prevSlide() { goToSlide(state.currentSlide - 1); }
+
+  function updateNavUI() {
+    // Progress bar
+    const pct = ((state.currentSlide - 1) / (state.totalSlides - 1)) * 100;
+    progressBar.style.width = pct + '%';
+
+    // Counter
+    counterCurrent.textContent = String(state.currentSlide).padStart(2, '0');
+
+    // Chapter indicator
+    const chapter = slides[state.currentSlide - 1].dataset.chapter;
+    if (chapter) {
+      chapterIndicator.textContent = chapter;
+      chapterIndicator.classList.add('visible');
+    } else {
+      chapterIndicator.classList.remove('visible');
+    }
+
+    // Notes
+    if (NOTES[state.currentSlide]) {
+      notesContent.innerHTML = NOTES[state.currentSlide];
+    } else {
+      notesContent.innerHTML = '<p style="color:var(--text-dim);">Bu slayd uchun yozuvlar mavjud emas.</p>';
+    }
+  }
+
+  // =======================================================================
+  // SLIDE ANIMATIONS
+  // =======================================================================
+  function triggerSlideAnimations(slide) {
+    const elements = slide.querySelectorAll('.chapter-tag, .slide-title, .slide-divider, .content-card, .hero-stat-value, .hero-stat-label, .rank-badge, .stat-item, .bar-row, .source-citation');
+    elements.forEach(el => el.classList.add('reveal'));
+
+    // Animate bar fills
+    const bars = slide.querySelectorAll('.bar-fill[data-width]');
+    setTimeout(() => {
+      bars.forEach(bar => {
+        bar.style.width = bar.dataset.width + '%';
+      });
+    }, 600);
+
+    // Animate counters
+    const counters = slide.querySelectorAll('[data-count-to]');
+    counters.forEach(el => {
+      const target = parseFloat(el.dataset.countTo);
+      const decimals = parseInt(el.dataset.decimals) || 0;
+      animateCounter(el, 0, target, 1500, decimals);
+    });
+  }
+
+  function animateCounter(el, start, end, duration, decimals) {
+    const startTime = performance.now();
+    function update(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease out expo
+      const eased = 1 - Math.pow(1 - progress, 4);
+      const value = start + (end - start) * eased;
+      el.textContent = value.toFixed(decimals);
+      if (progress < 1) requestAnimationFrame(update);
+    }
+    setTimeout(() => requestAnimationFrame(update), 400);
+  }
+
+  // =======================================================================
+  // KEYBOARD CONTROLS
+  // =======================================================================
+  document.addEventListener('keydown', (e) => {
+    switch(e.key) {
+      case 'ArrowRight': case ' ': case 'Enter':
+        e.preventDefault(); nextSlide(); break;
+      case 'ArrowLeft': case 'Backspace':
+        e.preventDefault(); prevSlide(); break;
+      case 'f': case 'F':
+        toggleFullscreen(); break;
+      case 'p': case 'P':
+        toggleNotes(); break;
+      case 'Escape':
+        if (state.notesOpen) toggleNotes();
+        break;
+      default:
+        // Number keys to jump
+        const num = parseInt(e.key);
+        if (num >= 1 && num <= state.totalSlides) goToSlide(num);
+    }
+  });
+
+  // Click to advance
+  document.getElementById('presentation').addEventListener('click', (e) => {
+    if (e.target.closest('#notes-panel') || e.target.closest('#fs-btn')) return;
+    const x = e.clientX / window.innerWidth;
+    if (x > 0.3) nextSlide(); else prevSlide();
+  });
+
+  // =======================================================================
+  // FULLSCREEN
+  // =======================================================================
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
+  document.getElementById('fs-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleFullscreen();
+  });
+
+  // =======================================================================
+  // NOTES PANEL
+  // =======================================================================
+  function toggleNotes() {
+    state.notesOpen = !state.notesOpen;
+    notesPanel.classList.toggle('open', state.notesOpen);
+  }
+
+  // =======================================================================
+  // CUSTOM CURSOR
+  // =======================================================================
+  document.addEventListener('mousemove', (e) => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+    cursor.classList.add('visible');
+  });
+  
+  document.addEventListener('mouseleave', () => cursor.classList.remove('visible'));
+
+  document.querySelectorAll('button, a, .content-card').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
+  });
+
+  // =======================================================================
+  // OPENING CINEMATIC SEQUENCE
+  // =======================================================================
+  function playOpening() {
+    if (state.openingPlayed) return;
+    state.openingPlayed = true;
+
+    const canvas = document.getElementById('opening-canvas');
+    const ctx = canvas.getContext('2d');
+    let w, h;
+    let particles = [];
+    let animFrame;
+
+    function resize() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Create particles
+    class Particle {
+      constructor() { this.reset(); }
+      reset() {
+        this.x = Math.random() * w;
+        this.y = Math.random() * h;
+        this.size = Math.random() * 2 + 0.5;
+        this.speedX = (Math.random() - 0.5) * 0.3;
+        this.speedY = (Math.random() - 0.5) * 0.3;
+        this.opacity = 0;
+        this.targetOpacity = Math.random() * 0.4 + 0.1;
+        this.hue = Math.random() > 0.5 ? '232,115,42' : '201,168,76'; // saffron or gold
+        this.fadeIn = Math.random() * 3000 + 1000;
+        this.born = performance.now();
+      }
+      update(now) {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        const age = now - this.born;
+        if (age < this.fadeIn) {
+          this.opacity = (age / this.fadeIn) * this.targetOpacity;
+        } else {
+          this.opacity = this.targetOpacity + Math.sin(age * 0.001) * 0.05;
+        }
+        if (this.x < -10 || this.x > w + 10 || this.y < -10 || this.y > h + 10) this.reset();
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${this.hue},${this.opacity})`;
+        ctx.fill();
+      }
+    }
+
+    for (let i = 0; i < 80; i++) particles.push(new Particle());
+
+    function drawParticles(now) {
+      ctx.clearRect(0, 0, w, h);
+      
+      // Subtle radial glow at center
+      const grd = ctx.createRadialGradient(w/2, h*0.42, 0, w/2, h*0.42, Math.min(w,h)*0.35);
+      grd.addColorStop(0, 'rgba(232,115,42,0.04)');
+      grd.addColorStop(1, 'rgba(232,115,42,0)');
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, w, h);
+      
+      particles.forEach(p => { p.update(now); p.draw(); });
+      
+      // Draw connection lines between close particles (subtle)
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          if (dist < 120) {
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = `rgba(201,168,76,${0.03 * (1 - dist/120)})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+      }
+      
+      animFrame = requestAnimationFrame(drawParticles);
+    }
+
+    // Timeline
+    // 0.5s: particles start
+    setTimeout(() => requestAnimationFrame(drawParticles), 500);
+
+    // 2s: map reveals
+    setTimeout(() => {
+      document.getElementById('india-map-container').classList.add('reveal');
+      document.querySelector('#india-map .outline').classList.add('animate');
+    }, 2000);
+
+    // 3.5s: map fill glow
+    setTimeout(() => {
+      document.querySelector('#india-map .fill-glow').classList.add('reveal');
+    }, 3500);
+
+    // 4s: ports glow
+    setTimeout(() => {
+      document.querySelectorAll('.port-dot').forEach((dot, i) => {
+        setTimeout(() => dot.classList.add('animate'), i * 150);
+      });
+    }, 4000);
+
+    // 5s: trade routes
+    setTimeout(() => {
+      document.querySelectorAll('.trade-route').forEach((route, i) => {
+        setTimeout(() => route.classList.add('animate'), i * 350);
+      });
+      document.querySelectorAll('.partner-label').forEach((label, i) => {
+        setTimeout(() => label.classList.add('animate'), i * 350 + 500);
+      });
+    }, 5000);
+
+    // 8s: title
+    setTimeout(() => {
+      document.querySelector('.title-main').classList.add('reveal');
+    }, 8000);
+
+    // 9s: subtitle
+    setTimeout(() => {
+      document.querySelector('.title-sub').classList.add('reveal');
+    }, 9200);
+
+    // 10s: line and uzbek text
+    setTimeout(() => {
+      document.querySelector('.title-line').classList.add('reveal');
+      document.querySelector('.title-uzbek').classList.add('reveal');
+    }, 10500);
+
+    // Store cleanup
+    state.openingCleanup = () => {
+      if (animFrame) cancelAnimationFrame(animFrame);
+    };
+  }
+
+  // =======================================================================
+  // INITIALIZATION
+  // =======================================================================
+  updateNavUI();
+  
+  // Small delay then start opening
+  setTimeout(playOpening, 300);
+
+  // Hide hint after a while
+  setTimeout(() => {
+    const hint = document.getElementById('nav-hint');
+    hint.style.opacity = '0';
+    setTimeout(() => hint.style.display = 'none', 500);
+  }, 15000);
+
+})();
+</script>
+
+</body>
+</html>
